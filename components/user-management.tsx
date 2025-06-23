@@ -1,45 +1,63 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Trash2, Plus, Edit, Phone, Mail, User, Shield } from "lucide-react"
-import { trpc } from "../lib/trpc-client"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Trash2, Plus, Edit, Phone, Mail, User, Shield } from "lucide-react";
+import { trpc } from "../lib/trpc-client";
 
 interface UserManagementProps {
-  userId: string
+  userId: string;
 }
 
 export function UserManagement({ userId }: UserManagementProps) {
-  const [isAddContactOpen, setIsAddContactOpen] = useState(false)
-  const [isEditRulesOpen, setIsEditRulesOpen] = useState(false)
+  const [isAddContactOpen, setIsAddContactOpen] = useState(false);
+  const [isEditRulesOpen, setIsEditRulesOpen] = useState(false);
 
-  const { data: user, refetch } = trpc.users.getById.useQuery({ id: userId })
+  const { data: user, refetch } = trpc.users.getById.useQuery({ id: userId });
 
   const addContact = trpc.emergencyContacts.create.useMutation({
     onSuccess: () => {
-      refetch()
-      setIsAddContactOpen(false)
+      refetch();
+      setIsAddContactOpen(false);
     },
-  })
+  });
 
   const updateRules = trpc.detectionRules.update.useMutation({
     onSuccess: () => {
-      refetch()
-      setIsEditRulesOpen(false)
+      refetch();
+      setIsEditRulesOpen(false);
     },
-  })
+  });
 
   if (!user) {
-    return <div>Loading user data...</div>
+    return <div>Loading user data...</div>;
   }
 
   return (
@@ -56,7 +74,9 @@ export function UserManagement({ userId }: UserManagementProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Name</Label>
-              <p className="text-lg font-medium">{user.name || "Not provided"}</p>
+              <p className="text-lg font-medium">
+                {user.name || "Not provided"}
+              </p>
             </div>
             <div>
               <Label>Email</Label>
@@ -68,7 +88,9 @@ export function UserManagement({ userId }: UserManagementProps) {
             </div>
             <div>
               <Label>Member Since</Label>
-              <p className="text-lg">{new Date(user.createdAt).toLocaleDateString()}</p>
+              <p className="text-lg">
+                {new Date(user.createdAt).toLocaleDateString()}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -88,9 +110,14 @@ export function UserManagement({ userId }: UserManagementProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Emergency Contacts</CardTitle>
-                  <CardDescription>Manage emergency contacts for this user</CardDescription>
+                  <CardDescription>
+                    Manage emergency contacts for this user
+                  </CardDescription>
                 </div>
-                <Dialog open={isAddContactOpen} onOpenChange={setIsAddContactOpen}>
+                <Dialog
+                  open={isAddContactOpen}
+                  onOpenChange={setIsAddContactOpen}
+                >
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
@@ -104,7 +131,7 @@ export function UserManagement({ userId }: UserManagementProps) {
                     <AddContactForm
                       userId={userId}
                       onSubmit={(data) => addContact.mutate(data)}
-                      isLoading={addContact.isLoading}
+                      isLoading={addContact.isPending}
                     />
                   </DialogContent>
                 </Dialog>
@@ -113,10 +140,15 @@ export function UserManagement({ userId }: UserManagementProps) {
             <CardContent>
               <div className="space-y-4">
                 {user.emergencyContacts.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No emergency contacts added yet.</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    No emergency contacts added yet.
+                  </p>
                 ) : (
                   user.emergencyContacts.map((contact) => (
-                    <div key={contact.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={contact.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center space-x-4">
                         <div className="p-2 bg-blue-100 rounded-full">
                           <User className="h-4 w-4 text-blue-600" />
@@ -135,7 +167,9 @@ export function UserManagement({ userId }: UserManagementProps) {
                               </span>
                             )}
                           </div>
-                          {contact.relation && <Badge variant="outline">{contact.relation}</Badge>}
+                          {contact.relation && (
+                            <Badge variant="outline">{contact.relation}</Badge>
+                          )}
                         </div>
                       </div>
                       <div className="flex space-x-2">
@@ -164,9 +198,14 @@ export function UserManagement({ userId }: UserManagementProps) {
                     <Shield className="h-5 w-5" />
                     Detection Rules
                   </CardTitle>
-                  <CardDescription>Configure safety detection parameters</CardDescription>
+                  <CardDescription>
+                    Configure safety detection parameters
+                  </CardDescription>
                 </div>
-                <Dialog open={isEditRulesOpen} onOpenChange={setIsEditRulesOpen}>
+                <Dialog
+                  open={isEditRulesOpen}
+                  onOpenChange={setIsEditRulesOpen}
+                >
                   <DialogTrigger asChild>
                     <Button>
                       <Edit className="h-4 w-4 mr-2" />
@@ -179,8 +218,13 @@ export function UserManagement({ userId }: UserManagementProps) {
                     </DialogHeader>
                     <EditRulesForm
                       rules={user.detectionRules[0]}
-                      onSubmit={(data) => updateRules.mutate({ id: user.detectionRules[0]?.id, ...data })}
-                      isLoading={updateRules.isLoading}
+                      onSubmit={(data) =>
+                        updateRules.mutate({
+                          id: user.detectionRules[0]?.id,
+                          ...data,
+                        })
+                      }
+                      isLoading={updateRules.isPending}
                     />
                   </DialogContent>
                 </Dialog>
@@ -195,29 +239,47 @@ export function UserManagement({ userId }: UserManagementProps) {
                       <div className="flex-1 bg-gray-200 rounded-full h-2">
                         <div
                           className="bg-blue-600 h-2 rounded-full"
-                          style={{ width: `${user.detectionRules[0].fallSensitivity * 100}%` }}
+                          style={{
+                            width: `${
+                              user.detectionRules[0].fallSensitivity * 100
+                            }%`,
+                          }}
                         />
                       </div>
                       <span className="text-sm font-medium">
-                        {Math.round(user.detectionRules[0].fallSensitivity * 100)}%
+                        {Math.round(
+                          user.detectionRules[0].fallSensitivity * 100
+                        )}
+                        %
                       </span>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label>Immobility Timeout</Label>
                     <p className="text-lg font-medium">
-                      {Math.floor(user.detectionRules[0].immobilityTimeout / 60)} minutes
+                      {Math.floor(
+                        user.detectionRules[0].immobilityTimeout / 60
+                      )}{" "}
+                      minutes
                     </p>
                   </div>
                   <div className="space-y-2">
                     <Label>Status</Label>
-                    <Badge variant={user.detectionRules[0].isActive ? "default" : "secondary"}>
+                    <Badge
+                      variant={
+                        user.detectionRules[0].isActive
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
                       {user.detectionRules[0].isActive ? "Active" : "Inactive"}
                     </Badge>
                   </div>
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">No detection rules configured.</p>
+                <p className="text-center text-muted-foreground py-8">
+                  No detection rules configured.
+                </p>
               )}
             </CardContent>
           </Card>
@@ -233,32 +295,47 @@ export function UserManagement({ userId }: UserManagementProps) {
             <CardContent>
               <div className="space-y-4">
                 {user.alerts.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No alerts in history.</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    No alerts in history.
+                  </p>
                 ) : (
                   user.alerts.map((alert) => (
-                    <div key={alert.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={alert.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div>
                         <div className="flex items-center space-x-2">
                           <Badge
-                            variant={alert.isResolved ? "secondary" : "destructive"}
+                            variant={
+                              alert.isResolved ? "secondary" : "destructive"
+                            }
                             className={
                               alert.severity === "CRITICAL"
                                 ? "bg-red-500"
                                 : alert.severity === "HIGH"
-                                  ? "bg-orange-500"
-                                  : alert.severity === "MEDIUM"
-                                    ? "bg-yellow-500"
-                                    : "bg-blue-500"
+                                ? "bg-orange-500"
+                                : alert.severity === "MEDIUM"
+                                ? "bg-yellow-500"
+                                : "bg-blue-500"
                             }
                           >
                             {alert.severity}
                           </Badge>
-                          <span className="font-medium">{alert.type.replace("_", " ")}</span>
+                          <span className="font-medium">
+                            {alert.type.replace("_", " ")}
+                          </span>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">{alert.message}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(alert.createdAt).toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {alert.message}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(alert.createdAt).toLocaleString()}
+                        </p>
                       </div>
-                      <Badge variant={alert.isResolved ? "default" : "destructive"}>
+                      <Badge
+                        variant={alert.isResolved ? "default" : "destructive"}
+                      >
                         {alert.isResolved ? "Resolved" : "Active"}
                       </Badge>
                     </div>
@@ -270,7 +347,7 @@ export function UserManagement({ userId }: UserManagementProps) {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 
 // Helper components
@@ -279,21 +356,21 @@ function AddContactForm({
   onSubmit,
   isLoading,
 }: {
-  userId: string
-  onSubmit: (data: any) => void
-  isLoading: boolean
+  userId: string;
+  onSubmit: (data: any) => void;
+  isLoading: boolean;
 }) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
     relation: "",
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit({ userId, ...formData })
-  }
+    e.preventDefault();
+    onSubmit({ userId, ...formData });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -327,7 +404,12 @@ function AddContactForm({
       </div>
       <div>
         <Label htmlFor="relation">Relationship</Label>
-        <Select value={formData.relation} onValueChange={(value) => setFormData({ ...formData, relation: value })}>
+        <Select
+          value={formData.relation}
+          onValueChange={(value) =>
+            setFormData({ ...formData, relation: value })
+          }
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select relationship" />
           </SelectTrigger>
@@ -346,7 +428,7 @@ function AddContactForm({
         {isLoading ? "Adding..." : "Add Contact"}
       </Button>
     </form>
-  )
+  );
 }
 
 function EditRulesForm({
@@ -354,20 +436,20 @@ function EditRulesForm({
   onSubmit,
   isLoading,
 }: {
-  rules: any
-  onSubmit: (data: any) => void
-  isLoading: boolean
+  rules: any;
+  onSubmit: (data: any) => void;
+  isLoading: boolean;
 }) {
   const [formData, setFormData] = useState({
     fallSensitivity: rules?.fallSensitivity || 0.8,
     immobilityTimeout: rules?.immobilityTimeout || 300,
     isActive: rules?.isActive || true,
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -380,9 +462,16 @@ function EditRulesForm({
           max="1"
           step="0.1"
           value={formData.fallSensitivity}
-          onChange={(e) => setFormData({ ...formData, fallSensitivity: Number.parseFloat(e.target.value) })}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              fallSensitivity: Number.parseFloat(e.target.value),
+            })
+          }
         />
-        <p className="text-sm text-muted-foreground">Current: {Math.round(formData.fallSensitivity * 100)}%</p>
+        <p className="text-sm text-muted-foreground">
+          Current: {Math.round(formData.fallSensitivity * 100)}%
+        </p>
       </div>
       <div>
         <Label htmlFor="immobilityTimeout">Immobility Timeout (minutes)</Label>
@@ -392,7 +481,12 @@ function EditRulesForm({
           min="1"
           max="60"
           value={Math.floor(formData.immobilityTimeout / 60)}
-          onChange={(e) => setFormData({ ...formData, immobilityTimeout: Number.parseInt(e.target.value) * 60 })}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              immobilityTimeout: Number.parseInt(e.target.value) * 60,
+            })
+          }
         />
       </div>
       <div className="flex items-center space-x-2">
@@ -400,7 +494,9 @@ function EditRulesForm({
           type="checkbox"
           id="isActive"
           checked={formData.isActive}
-          onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+          onChange={(e) =>
+            setFormData({ ...formData, isActive: e.target.checked })
+          }
         />
         <Label htmlFor="isActive">Enable detection rules</Label>
       </div>
@@ -408,5 +504,5 @@ function EditRulesForm({
         {isLoading ? "Updating..." : "Update Rules"}
       </Button>
     </form>
-  )
+  );
 }
