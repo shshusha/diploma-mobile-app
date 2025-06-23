@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  alerts           Alert[]
+  locations        Location[]
+  emergencyContacts EmergencyContact[]
+  detectionRules   DetectionRule[]
+
+  @@map("users")
+}
+
+model Alert {
+  id          String    @id @default(cuid())
+  userId      String
+  type        AlertType
+  severity    Severity
+  message     String
+  latitude    Float?
+  longitude   Float?
+  isResolved  Boolean   @default(false)
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  userId    String
+  latitude  Float
+  longitude Float
+  accuracy  Float?
+  speed     Float?
+  heading   Float?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("locations")
+}
+
+model EmergencyContact {
+  id       String @id @default(cuid())
+  userId   String
+  name     String
+  phone    String
+  email    String?
+  relation String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("emergency_contacts")
+}
+
+model DetectionRule {
+  id                String  @id @default(cuid())
+  userId            String
+  fallSensitivity   Float   @default(0.8)
+  immobilityTimeout Int     @default(300) // seconds
+  isActive          Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("detection_rules")
+}
+
+enum AlertType {
+  FALL_DETECTED
+  IMMOBILITY_DETECTED
+  ROUTE_DEVIATION
+  DANGER_ZONE_ENTRY
+  MANUAL_EMERGENCY
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
