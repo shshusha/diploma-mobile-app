@@ -1,91 +1,123 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { AlertTriangle, MapPin, Users, Shield, Clock, CheckCircle, Activity, Wifi, WifiOff } from "lucide-react"
-import { trpc } from "../lib/trpc-client"
-import { LocationMap } from "./maps/location-map"
-import { UserManagement } from "./user-management"
-import { useSSE } from "../lib/sse"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertTriangle,
+  MapPin,
+  Users,
+  Shield,
+  Clock,
+  CheckCircle,
+  Activity,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
+import { trpc } from "../lib/trpc-client";
+import { LocationMap } from "./maps/location-map";
+import { UserManagement } from "./user-management";
+import { useSSE } from "../lib/sse";
 
 export function EnhancedDashboard() {
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
-  const [isUserManagementOpen, setIsUserManagementOpen] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
 
   // Real-time data via SSE
   const { data: realtimeData, isConnected } = useSSE<{
-    alerts: any[]
-    users: any[]
-    timestamp: string
-  }>("/api/sse")
+    alerts: any[];
+    users: any[];
+    timestamp: string;
+  }>("/api/sse");
 
   // Fallback to tRPC if SSE is not connected
-  const { data: users, isLoading: usersLoading } = trpc.users.getAll.useQuery(undefined, {
-    enabled: !isConnected,
-  })
-  const { data: alerts, isLoading: alertsLoading } = trpc.alerts.getAll.useQuery(
-    {
-      isResolved: false,
-      limit: 10,
-    },
+  const { data: users, isLoading: usersLoading } = trpc.users.getAll.useQuery(
+    undefined,
     {
       enabled: !isConnected,
-    },
-  )
+    }
+  );
+  const { data: alerts, isLoading: alertsLoading } =
+    trpc.alerts.getAll.useQuery(
+      {
+        isResolved: false,
+        limit: 10,
+      },
+      {
+        enabled: !isConnected,
+      }
+    );
 
   const resolveAlert = trpc.alerts.resolve.useMutation({
     onSuccess: () => {
       // Data will be updated via SSE
     },
-  })
+  });
 
   // Use real-time data if available, otherwise fallback to tRPC data
-  const currentUsers = realtimeData?.users || users || []
-  const currentAlerts = realtimeData?.alerts || alerts || []
+  const currentUsers = realtimeData?.users || users || [];
+  const currentAlerts = realtimeData?.alerts || alerts || [];
 
   if (!isConnected && (usersLoading || alertsLoading)) {
-    return <div className="flex items-center justify-center h-64">Loading dashboard...</div>
+    return (
+      <div className="flex items-center justify-center h-64">
+        Loading dashboard...
+      </div>
+    );
   }
 
-  const activeAlerts = currentAlerts.filter((alert) => !alert.isResolved)
-  const totalUsers = currentUsers.length
-  const criticalAlerts = activeAlerts.filter((alert) => alert.severity === "CRITICAL").length
+  const activeAlerts = currentAlerts.filter((alert) => !alert.isResolved);
+  const totalUsers = currentUsers.length;
+  const criticalAlerts = activeAlerts.filter(
+    (alert) => alert.severity === "CRITICAL"
+  ).length;
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "CRITICAL":
-        return "bg-red-500"
+        return "bg-red-500";
       case "HIGH":
-        return "bg-orange-500"
+        return "bg-orange-500";
       case "MEDIUM":
-        return "bg-yellow-500"
+        return "bg-yellow-500";
       case "LOW":
-        return "bg-blue-500"
+        return "bg-blue-500";
       default:
-        return "bg-gray-500"
+        return "bg-gray-500";
     }
-  }
+  };
 
   const getAlertTypeIcon = (type: string) => {
     switch (type) {
       case "FALL_DETECTED":
-        return "🚨"
+        return "🚨";
       case "IMMOBILITY_DETECTED":
-        return "⏰"
+        return "⏰";
       case "ROUTE_DEVIATION":
-        return "🗺️"
+        return "🗺️";
       case "DANGER_ZONE_ENTRY":
-        return "⚠️"
+        return "⚠️";
       case "MANUAL_EMERGENCY":
-        return "🆘"
+        return "🆘";
       default:
-        return "📢"
+        return "📢";
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -95,7 +127,9 @@ export function EnhancedDashboard() {
           {isConnected ? (
             <>
               <Wifi className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-green-600">Live updates connected</span>
+              <span className="text-sm text-green-600">
+                Live updates connected
+              </span>
             </>
           ) : (
             <>
@@ -120,7 +154,9 @@ export function EnhancedDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">Active monitoring users</p>
+            <p className="text-xs text-muted-foreground">
+              Active monitoring users
+            </p>
           </CardContent>
         </Card>
 
@@ -137,12 +173,18 @@ export function EnhancedDashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Critical Alerts</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Critical Alerts
+            </CardTitle>
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">{criticalAlerts}</div>
-            <p className="text-xs text-muted-foreground">Require immediate attention</p>
+            <div className="text-2xl font-bold text-red-600">
+              {criticalAlerts}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Require immediate attention
+            </p>
           </CardContent>
         </Card>
 
@@ -153,7 +195,9 @@ export function EnhancedDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">Online</div>
-            <p className="text-xs text-muted-foreground">All systems operational</p>
+            <p className="text-xs text-muted-foreground">
+              All systems operational
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -170,31 +214,49 @@ export function EnhancedDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>Recent Alerts</CardTitle>
-              <CardDescription>Latest safety alerts from monitored users</CardDescription>
+              <CardDescription>
+                Latest safety alerts from monitored users
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {activeAlerts.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">No active alerts. All users are safe! 🎉</p>
+                  <p className="text-center text-muted-foreground py-8">
+                    No active alerts. All users are safe! 🎉
+                  </p>
                 ) : (
                   activeAlerts.map((alert) => (
-                    <div key={alert.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={alert.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center space-x-4">
-                        <div className="text-2xl">{getAlertTypeIcon(alert.type)}</div>
+                        <div className="text-2xl">
+                          {getAlertTypeIcon(alert.type)}
+                        </div>
                         <div>
                           <div className="flex items-center space-x-2">
-                            <p className="font-medium">{alert.user.name || alert.user.email}</p>
-                            <Badge className={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
+                            <p className="font-medium">
+                              {alert.user.name || alert.user.email}
+                            </p>
+                            <Badge className={getSeverityColor(alert.severity)}>
+                              {alert.severity}
+                            </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">{alert.message}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {alert.message}
+                          </p>
                           <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-1">
                             <Clock className="h-3 w-3" />
-                            <span>{new Date(alert.createdAt).toLocaleString()}</span>
+                            <span>
+                              {new Date(alert.createdAt).toLocaleString()}
+                            </span>
                             {alert.latitude && alert.longitude && (
                               <>
                                 <MapPin className="h-3 w-3 ml-2" />
                                 <span>
-                                  {alert.latitude.toFixed(4)}, {alert.longitude.toFixed(4)}
+                                  {alert.latitude.toFixed(4)},{" "}
+                                  {alert.longitude.toFixed(4)}
                                 </span>
                               </>
                             )}
@@ -207,7 +269,10 @@ export function EnhancedDashboard() {
                           variant="outline"
                           onClick={() => {
                             if (alert.latitude && alert.longitude) {
-                              window.open(`https://maps.google.com/?q=${alert.latitude},${alert.longitude}`, "_blank")
+                              window.open(
+                                `https://maps.google.com/?q=${alert.latitude},${alert.longitude}`,
+                                "_blank"
+                              );
                             }
                           }}
                           disabled={!alert.latitude || !alert.longitude}
@@ -239,35 +304,52 @@ export function EnhancedDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>User Management</CardTitle>
-              <CardDescription>Manage users and their safety settings</CardDescription>
+              <CardDescription>
+                Manage users and their safety settings
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {currentUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div>
-                      <p className="font-medium">{user.name || "Unnamed User"}</p>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                      {user.phone && <p className="text-sm text-muted-foreground">{user.phone}</p>}
+                      <p className="font-medium">
+                        {user.name || "Unnamed User"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
+                      {user.phone && (
+                        <p className="text-sm text-muted-foreground">
+                          {user.phone}
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="text-right text-sm text-muted-foreground">
                         <div>{user._count?.alerts || 0} alerts</div>
-                        <div>{user._count?.emergencyContacts || 0} contacts</div>
+                        <div>
+                          {user._count?.emergencyContacts || 0} contacts
+                        </div>
                       </div>
                       <Dialog
-                        open={isUserManagementOpen && selectedUserId === user.id}
+                        open={
+                          isUserManagementOpen && selectedUserId === user.id
+                        }
                         onOpenChange={(open) => {
-                          setIsUserManagementOpen(open)
-                          if (!open) setSelectedUserId(null)
+                          setIsUserManagementOpen(open);
+                          if (!open) setSelectedUserId(null);
                         }}
                       >
                         <DialogTrigger asChild>
                           <Button
                             size="sm"
                             onClick={() => {
-                              setSelectedUserId(user.id)
-                              setIsUserManagementOpen(true)
+                              setSelectedUserId(user.id);
+                              setIsUserManagementOpen(true);
                             }}
                           >
                             Manage
@@ -275,9 +357,13 @@ export function EnhancedDashboard() {
                         </DialogTrigger>
                         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
-                            <DialogTitle>Manage {user.name || user.email}</DialogTitle>
+                            <DialogTitle>
+                              Manage {user.name || user.email}
+                            </DialogTitle>
                           </DialogHeader>
-                          {selectedUserId && <UserManagement userId={selectedUserId} />}
+                          {selectedUserId && (
+                            <UserManagement userId={selectedUserId} />
+                          )}
                         </DialogContent>
                       </Dialog>
                     </div>
@@ -289,5 +375,5 @@ export function EnhancedDashboard() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
