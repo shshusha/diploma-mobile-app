@@ -1,0 +1,101 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table users {
+  id String [pk]
+  email String [unique, not null]
+  name String
+  phone String
+  telegramChatId Int
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  alerts alerts [not null]
+  locations locations [not null]
+  emergencyContacts emergency_contacts [not null]
+  detectionRules detection_rules [not null]
+}
+
+Table alerts {
+  id String [pk]
+  userId String [not null]
+  type AlertType [not null]
+  severity Severity [not null]
+  message String [not null]
+  latitude Float
+  longitude Float
+  isResolved Boolean [not null, default: false]
+  resolvedAt DateTime
+  createdAt DateTime [default: `now()`, not null]
+  user users [not null]
+}
+
+Table locations {
+  id String [pk]
+  userId String [not null]
+  latitude Float [not null]
+  longitude Float [not null]
+  accuracy Float
+  speed Float
+  heading Float
+  createdAt DateTime [default: `now()`, not null]
+  user users [not null]
+}
+
+Table emergency_contacts {
+  id String [pk]
+  userId String [not null]
+  name String [not null]
+  phone String [not null]
+  email String
+  relation String
+  user users [not null]
+}
+
+Table detection_rules {
+  id String [pk]
+  userId String [not null]
+  fallSensitivity Float [not null, default: 0.8]
+  immobilityTimeout Int [not null, default: 300]
+  isActive Boolean [not null, default: true]
+  user users [not null]
+}
+
+Enum AlertType {
+  SEVERE_WEATHER_WARNING
+  FLOOD_WARNING
+  TORNADO_WARNING
+  HURRICANE_WARNING
+  EARTHQUAKE_ALERT
+  TSUNAMI_WARNING
+  WILDFIRE_ALERT
+  CIVIL_EMERGENCY
+  AMBER_ALERT
+  SILVER_ALERT
+  TERRORISM_ALERT
+  HAZMAT_INCIDENT
+  INFRASTRUCTURE_FAILURE
+  PUBLIC_HEALTH_EMERGENCY
+  EVACUATION_ORDER
+  SHELTER_IN_PLACE
+  ROAD_CLOSURE
+  POWER_OUTAGE
+  WATER_EMERGENCY
+}
+
+Enum Severity {
+  INFO
+  ADVISORY
+  WATCH
+  WARNING
+  EMERGENCY
+  CRITICAL
+}
+
+Ref: alerts.userId > users.id [delete: Cascade]
+
+Ref: locations.userId > users.id [delete: Cascade]
+
+Ref: emergency_contacts.userId > users.id [delete: Cascade]
+
+Ref: detection_rules.userId > users.id [delete: Cascade]
