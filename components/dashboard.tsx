@@ -29,7 +29,7 @@ export function Dashboard() {
     });
 
   const invalidateAlerts = () => {
-    utils.alerts.getAll.invalidate();
+    utils.alerts.getAll.invalidate({ isResolved: false, limit: 10 });
   };
 
   const resolveAlert = trpc.alerts.resolve.useMutation({

@@ -20,7 +20,7 @@ interface LocationMapProps {
     locations: Array<{
       latitude: number;
       longitude: number;
-      createdAt: string;
+      createdAt: Date;
     }>;
   }>;
   alerts: Array<{

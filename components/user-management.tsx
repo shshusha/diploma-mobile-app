@@ -287,66 +287,64 @@ export function UserManagement({ userId }: UserManagementProps) {
 
         {/* Alert History */}
         <TabsContent value="history">
-          <Card>
-            <CardHeader>
-              <CardTitle>Alert History</CardTitle>
-              <CardDescription>Recent alerts for this user</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {user.alerts.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">
-                    No alerts in history.
-                  </p>
-                ) : (
-                  user.alerts.map((alert) => (
-                    <div
-                      key={alert.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <Badge
-                            variant={
-                              alert.isResolved ? "secondary" : "destructive"
-                            }
-                            className={
-                              alert.severity === "CRITICAL"
-                                ? "bg-red-500"
-                                : alert.severity === "HIGH"
-                                ? "bg-orange-500"
-                                : alert.severity === "MEDIUM"
-                                ? "bg-yellow-500"
-                                : "bg-blue-500"
-                            }
-                          >
-                            {alert.severity}
-                          </Badge>
-                          <span className="font-medium">
-                            {alert.type.replace("_", " ")}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {alert.message}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(alert.createdAt).toLocaleString()}
-                        </p>
-                      </div>
-                      <Badge
-                        variant={alert.isResolved ? "default" : "destructive"}
-                      >
-                        {alert.isResolved ? "Resolved" : "Active"}
-                      </Badge>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <AlertHistoryTab userId={userId} />
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function AlertHistoryTab({ userId }: { userId: string }) {
+  const { data: alerts, isLoading } = trpc.alerts.getAll.useQuery({
+    userId,
+    isResolved: true,
+  });
+
+  if (isLoading) return <div>Loading alert history...</div>;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Alert History</CardTitle>
+        <CardDescription>
+          Previously resolved alerts for this user.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {alerts && alerts.length > 0 ? (
+            alerts.map((alert) => (
+              <div key={alert.id} className="p-4 border rounded-lg opacity-70">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <p className="font-medium">
+                        {alert.type.replace(/_/g, " ")}
+                      </p>
+                      <Badge variant="secondary">{alert.severity}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {alert.message}
+                    </p>
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Resolved at:{" "}
+                      {new Date(alert.resolvedAt!).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Created: {new Date(alert.createdAt).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-muted-foreground py-8">
+              No resolved alerts found for this user.
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

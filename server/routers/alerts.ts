@@ -13,7 +13,7 @@ export const alertsRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return await prisma.alert.findMany({
+      const alerts = await prisma.alert.findMany({
         where: {
           userId: input.userId,
           isResolved: input.isResolved,
@@ -29,6 +29,7 @@ export const alertsRouter = router({
         orderBy: { createdAt: "desc" },
         take: input.limit,
       });
+      return alerts || [];
     }),
 
   resolve: publicProcedure
@@ -92,7 +93,6 @@ export const alertsRouter = router({
 
       // Send Telegram notification if user has telegramChatId
       const userWithTelegram = alert.user;
-      console.log(userWithTelegram);
       if (userWithTelegram && userWithTelegram.telegramChatId) {
         console.log(
           "Sending Telegram alert to user",

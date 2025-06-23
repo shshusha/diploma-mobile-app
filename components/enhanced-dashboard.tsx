@@ -83,10 +83,13 @@ export function EnhancedDashboard() {
   const resolveAlert = trpc.alerts.resolve.useMutation({
     onMutate: async ({ id }) => {
       // Cancel any outgoing refetches
-      await utils.alerts.getAll.cancel();
+      await utils.alerts.getAll.cancel({ isResolved: false, limit: 10 });
 
       // Snapshot the previous value
-      const previousAlerts = utils.alerts.getAll.getData();
+      const previousAlerts = utils.alerts.getAll.getData({
+        isResolved: false,
+        limit: 10,
+      });
 
       // Optimistically update to the new value
       if (previousAlerts) {
@@ -97,7 +100,7 @@ export function EnhancedDashboard() {
               ? {
                   ...alert,
                   isResolved: true,
-                  resolvedAt: new Date().toISOString(),
+                  resolvedAt: new Date(),
                 }
               : alert
           )
@@ -129,14 +132,14 @@ export function EnhancedDashboard() {
     },
     onSettled: () => {
       // Always refetch after error or success to ensure we have the latest data
-      utils.alerts.getAll.invalidate();
+      utils.alerts.getAll.invalidate({ isResolved: false, limit: 10 });
       utils.users.getAll.invalidate();
     },
   });
 
   const invalidateQueries = () => {
     // Invalidate tRPC queries to refresh data
-    utils.alerts.getAll.invalidate();
+    utils.alerts.getAll.invalidate({ isResolved: false, limit: 10 });
     utils.users.getAll.invalidate();
   };
 
