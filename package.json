@@ -71,6 +71,7 @@
     "recharts": "latest",
     "sonner": "latest",
     "superjson": "^2.2.2",
+    "supports-color": "^10.0.0",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "latest",
