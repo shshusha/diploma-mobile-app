@@ -35,13 +35,14 @@ import { AlertTriangle, Plus, MapPin, Loader2 } from "lucide-react";
 import { trpc } from "../lib/trpc-client";
 import { LocationPicker } from "./location-picker";
 import { useToast } from "@/components/ui/use-toast";
+import { AlertType, Severity } from "@prisma/client";
 
 const alertFormSchema = z.object({
   userId: z.string().min(1, "Please select a user"),
-  type: z.enum(["FALL_DETECTED", "IMMOBILITY_DETECTED", "ROUTE_DEVIATION"], {
+  type: z.nativeEnum(AlertType, {
     required_error: "Please select an alert type",
   }),
-  severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"], {
+  severity: z.nativeEnum(Severity, {
     required_error: "Please select a severity level",
   }),
   message: z.string().min(1, "Message is required"),
@@ -111,31 +112,162 @@ export function AddAlertModal({ onAlertAdded }: AddAlertModalProps) {
   // Pre-defined messages for different alert types
   const getDefaultMessage = (type: string, severity: string) => {
     const messages = {
-      FALL_DETECTED: {
-        LOW: "Minor fall detected - user may need assistance",
-        MEDIUM: "Fall detected - immediate check recommended",
-        HIGH: "Significant fall detected - urgent response needed",
-        CRITICAL:
-          "CRITICAL FALL DETECTED - Emergency response required immediately",
+      SEVERE_WEATHER_WARNING: {
+        INFO: "Severe Weather Warning - Low Impact",
+        ADVISORY: "Severe Weather Warning - Advisory",
+        WATCH: "Severe Weather Warning - Watch",
+        WARNING: "Severe Weather Warning - Warning",
+        EMERGENCY: "Severe Weather Warning - Emergency",
+        CRITICAL: "Severe Weather Warning - Critical",
       },
-      IMMOBILITY_DETECTED: {
-        LOW: "User has been stationary for extended period",
-        MEDIUM: "No movement detected for concerning duration",
-        HIGH: "Prolonged immobility detected - welfare check needed",
-        CRITICAL:
-          "CRITICAL - No movement detected for extended period - Emergency response required",
+      FLOOD_WARNING: {
+        INFO: "Flood Warning - Low Impact",
+        ADVISORY: "Flood Warning - Advisory",
+        WATCH: "Flood Warning - Watch",
+        WARNING: "Flood Warning - Warning",
+        EMERGENCY: "Flood Warning - Emergency",
+        CRITICAL: "Flood Warning - Critical",
       },
-      ROUTE_DEVIATION: {
-        LOW: "User has slightly deviated from planned route",
-        MEDIUM: "User has deviated from expected route",
-        HIGH: "Significant route deviation detected - location check needed",
-        CRITICAL:
-          "CRITICAL - User far from planned route - Immediate location verification required",
+      TORNADO_WARNING: {
+        INFO: "Tornado Warning - Low Impact",
+        ADVISORY: "Tornado Warning - Advisory",
+        WATCH: "Tornado Warning - Watch",
+        WARNING: "Tornado Warning - Warning",
+        EMERGENCY: "Tornado Warning - Emergency",
+        CRITICAL: "Tornado Warning - Critical",
+      },
+      HURRICANE_WARNING: {
+        INFO: "Hurricane Warning - Low Impact",
+        ADVISORY: "Hurricane Warning - Advisory",
+        WATCH: "Hurricane Warning - Watch",
+        WARNING: "Hurricane Warning - Warning",
+        EMERGENCY: "Hurricane Warning - Emergency",
+        CRITICAL: "Hurricane Warning - Critical",
+      },
+      EARTHQUAKE_ALERT: {
+        INFO: "Earthquake Alert - Low Impact",
+        ADVISORY: "Earthquake Alert - Advisory",
+        WATCH: "Earthquake Alert - Watch",
+        WARNING: "Earthquake Alert - Warning",
+        EMERGENCY: "Earthquake Alert - Emergency",
+        CRITICAL: "Earthquake Alert - Critical",
+      },
+      TSUNAMI_WARNING: {
+        INFO: "Tsunami Warning - Low Impact",
+        ADVISORY: "Tsunami Warning - Advisory",
+        WATCH: "Tsunami Warning - Watch",
+        WARNING: "Tsunami Warning - Warning",
+        EMERGENCY: "Tsunami Warning - Emergency",
+        CRITICAL: "Tsunami Warning - Critical",
+      },
+      WILDFIRE_ALERT: {
+        INFO: "Wildfire Alert - Low Impact",
+        ADVISORY: "Wildfire Alert - Advisory",
+        WATCH: "Wildfire Alert - Watch",
+        WARNING: "Wildfire Alert - Warning",
+        EMERGENCY: "Wildfire Alert - Emergency",
+        CRITICAL: "Wildfire Alert - Critical",
+      },
+      CIVIL_EMERGENCY: {
+        INFO: "Civil Emergency - Low Impact",
+        ADVISORY: "Civil Emergency - Advisory",
+        WATCH: "Civil Emergency - Watch",
+        WARNING: "Civil Emergency - Warning",
+        EMERGENCY: "Civil Emergency - Emergency",
+        CRITICAL: "Civil Emergency - Critical",
+      },
+      AMBER_ALERT: {
+        INFO: "Amber Alert - Low Impact",
+        ADVISORY: "Amber Alert - Advisory",
+        WATCH: "Amber Alert - Watch",
+        WARNING: "Amber Alert - Warning",
+        EMERGENCY: "Amber Alert - Emergency",
+        CRITICAL: "Amber Alert - Critical",
+      },
+      SILVER_ALERT: {
+        INFO: "Silver Alert - Low Impact",
+        ADVISORY: "Silver Alert - Advisory",
+        WATCH: "Silver Alert - Watch",
+        WARNING: "Silver Alert - Warning",
+        EMERGENCY: "Silver Alert - Emergency",
+        CRITICAL: "Silver Alert - Critical",
+      },
+      TERRORISM_ALERT: {
+        INFO: "Terrorism Alert - Low Impact",
+        ADVISORY: "Terrorism Alert - Advisory",
+        WATCH: "Terrorism Alert - Watch",
+        WARNING: "Terrorism Alert - Warning",
+        EMERGENCY: "Terrorism Alert - Emergency",
+        CRITICAL: "Terrorism Alert - Critical",
+      },
+      HAZMAT_INCIDENT: {
+        INFO: "Hazmat Incident - Low Impact",
+        ADVISORY: "Hazmat Incident - Advisory",
+        WATCH: "Hazmat Incident - Watch",
+        WARNING: "Hazmat Incident - Warning",
+        EMERGENCY: "Hazmat Incident - Emergency",
+        CRITICAL: "Hazmat Incident - Critical",
+      },
+      INFRASTRUCTURE_FAILURE: {
+        INFO: "Infrastructure Failure - Low Impact",
+        ADVISORY: "Infrastructure Failure - Advisory",
+        WATCH: "Infrastructure Failure - Watch",
+        WARNING: "Infrastructure Failure - Warning",
+        EMERGENCY: "Infrastructure Failure - Emergency",
+        CRITICAL: "Infrastructure Failure - Critical",
+      },
+      PUBLIC_HEALTH_EMERGENCY: {
+        INFO: "Public Health Emergency - Low Impact",
+        ADVISORY: "Public Health Emergency - Advisory",
+        WATCH: "Public Health Emergency - Watch",
+        WARNING: "Public Health Emergency - Warning",
+        EMERGENCY: "Public Health Emergency - Emergency",
+        CRITICAL: "Public Health Emergency - Critical",
+      },
+      EVACUATION_ORDER: {
+        INFO: "Evacuation Order - Low Impact",
+        ADVISORY: "Evacuation Order - Advisory",
+        WATCH: "Evacuation Order - Watch",
+        WARNING: "Evacuation Order - Warning",
+        EMERGENCY: "Evacuation Order - Emergency",
+        CRITICAL: "Evacuation Order - Critical",
+      },
+      SHELTER_IN_PLACE: {
+        INFO: "Shelter in Place - Low Impact",
+        ADVISORY: "Shelter in Place - Advisory",
+        WATCH: "Shelter in Place - Watch",
+        WARNING: "Shelter in Place - Warning",
+        EMERGENCY: "Shelter in Place - Emergency",
+        CRITICAL: "Shelter in Place - Critical",
+      },
+      ROAD_CLOSURE: {
+        INFO: "Road Closure - Low Impact",
+        ADVISORY: "Road Closure - Advisory",
+        WATCH: "Road Closure - Watch",
+        WARNING: "Road Closure - Warning",
+        EMERGENCY: "Road Closure - Emergency",
+        CRITICAL: "Road Closure - Critical",
+      },
+      POWER_OUTAGE: {
+        INFO: "Power Outage - Low Impact",
+        ADVISORY: "Power Outage - Advisory",
+        WATCH: "Power Outage - Watch",
+        WARNING: "Power Outage - Warning",
+        EMERGENCY: "Power Outage - Emergency",
+        CRITICAL: "Power Outage - Critical",
+      },
+      WATER_EMERGENCY: {
+        INFO: "Water Emergency - Low Impact",
+        ADVISORY: "Water Emergency - Advisory",
+        WATCH: "Water Emergency - Watch",
+        WARNING: "Water Emergency - Warning",
+        EMERGENCY: "Water Emergency - Emergency",
+        CRITICAL: "Water Emergency - Critical",
       },
     };
     return (
       messages[type as keyof typeof messages]?.[
-        severity as keyof typeof messages.FALL_DETECTED
+        severity as keyof typeof messages.SEVERE_WEATHER_WARNING
       ] || ""
     );
   };
@@ -155,12 +287,14 @@ export function AddAlertModal({ onAlertAdded }: AddAlertModalProps) {
     switch (severity) {
       case "CRITICAL":
         return "bg-red-500 hover:bg-red-600";
-      case "HIGH":
+      case "EMERGENCY":
         return "bg-orange-500 hover:bg-orange-600";
-      case "MEDIUM":
+      case "WARNING":
         return "bg-yellow-500 hover:bg-yellow-600";
-      case "LOW":
+      case "ADVISORY":
         return "bg-blue-500 hover:bg-blue-600";
+      case "INFO":
+        return "bg-gray-500 hover:bg-gray-600";
       default:
         return "bg-gray-500 hover:bg-gray-600";
     }
@@ -168,12 +302,44 @@ export function AddAlertModal({ onAlertAdded }: AddAlertModalProps) {
 
   const getAlertTypeIcon = (type: string) => {
     switch (type) {
-      case "FALL_DETECTED":
+      case "SEVERE_WEATHER_WARNING":
+        return "🌪️";
+      case "FLOOD_WARNING":
+        return "🌊";
+      case "TORNADO_WARNING":
+        return "🌪️";
+      case "HURRICANE_WARNING":
+        return "🌪️";
+      case "EARTHQUAKE_ALERT":
+        return "🌏";
+      case "TSUNAMI_WARNING":
+        return "🌊";
+      case "WILDFIRE_ALERT":
+        return "🔥";
+      case "CIVIL_EMERGENCY":
         return "🚨";
-      case "IMMOBILITY_DETECTED":
-        return "⏰";
-      case "ROUTE_DEVIATION":
-        return "🗺️";
+      case "AMBER_ALERT":
+        return "🚨";
+      case "SILVER_ALERT":
+        return "🚨";
+      case "TERRORISM_ALERT":
+        return "🚨";
+      case "HAZMAT_INCIDENT":
+        return "🚨";
+      case "INFRASTRUCTURE_FAILURE":
+        return "🚨";
+      case "PUBLIC_HEALTH_EMERGENCY":
+        return "🚨";
+      case "EVACUATION_ORDER":
+        return "��";
+      case "SHELTER_IN_PLACE":
+        return "🏠";
+      case "ROAD_CLOSURE":
+        return "🚧";
+      case "POWER_OUTAGE":
+        return "💡";
+      case "WATER_EMERGENCY":
+        return "🌊";
       default:
         return "📢";
     }
@@ -261,22 +427,118 @@ export function AddAlertModal({ onAlertAdded }: AddAlertModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="FALL_DETECTED">
+                      <SelectItem value="SEVERE_WEATHER_WARNING">
+                        <div className="flex items-center space-x-2">
+                          <span>🌪️</span>
+                          <span>Severe Weather Warning</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="FLOOD_WARNING">
+                        <div className="flex items-center space-x-2">
+                          <span>🌊</span>
+                          <span>Flood Warning</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="TORNADO_WARNING">
+                        <div className="flex items-center space-x-2">
+                          <span>🌪️</span>
+                          <span>Tornado Warning</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="HURRICANE_WARNING">
+                        <div className="flex items-center space-x-2">
+                          <span>🌪️</span>
+                          <span>Hurricane Warning</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="EARTHQUAKE_ALERT">
+                        <div className="flex items-center space-x-2">
+                          <span>🌏</span>
+                          <span>Earthquake Alert</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="TSUNAMI_WARNING">
+                        <div className="flex items-center space-x-2">
+                          <span>🌊</span>
+                          <span>Tsunami Warning</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="WILDFIRE_ALERT">
+                        <div className="flex items-center space-x-2">
+                          <span>🔥</span>
+                          <span>Wildfire Alert</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="CIVIL_EMERGENCY">
                         <div className="flex items-center space-x-2">
                           <span>🚨</span>
-                          <span>Fall Detected</span>
+                          <span>Civil Emergency</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="IMMOBILITY_DETECTED">
+                      <SelectItem value="AMBER_ALERT">
                         <div className="flex items-center space-x-2">
-                          <span>⏰</span>
-                          <span>Immobility Detected</span>
+                          <span>🚨</span>
+                          <span>Amber Alert</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="ROUTE_DEVIATION">
+                      <SelectItem value="SILVER_ALERT">
                         <div className="flex items-center space-x-2">
-                          <span>🗺️</span>
-                          <span>Route Deviation</span>
+                          <span>🚨</span>
+                          <span>Silver Alert</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="TERRORISM_ALERT">
+                        <div className="flex items-center space-x-2">
+                          <span>🚨</span>
+                          <span>Terrorism Alert</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="HAZMAT_INCIDENT">
+                        <div className="flex items-center space-x-2">
+                          <span>🚨</span>
+                          <span>Hazmat Incident</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="INFRASTRUCTURE_FAILURE">
+                        <div className="flex items-center space-x-2">
+                          <span>🚨</span>
+                          <span>Infrastructure Failure</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="PUBLIC_HEALTH_EMERGENCY">
+                        <div className="flex items-center space-x-2">
+                          <span>🚨</span>
+                          <span>Public Health Emergency</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="EVACUATION_ORDER">
+                        <div className="flex items-center space-x-2">
+                          <span>🚨</span>
+                          <span>Evacuation Order</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="SHELTER_IN_PLACE">
+                        <div className="flex items-center space-x-2">
+                          <span>🏠</span>
+                          <span>Shelter in Place</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="ROAD_CLOSURE">
+                        <div className="flex items-center space-x-2">
+                          <span>🚧</span>
+                          <span>Road Closure</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="POWER_OUTAGE">
+                        <div className="flex items-center space-x-2">
+                          <span>💡</span>
+                          <span>Power Outage</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="WATER_EMERGENCY">
+                        <div className="flex items-center space-x-2">
+                          <span>🌊</span>
+                          <span>Water Emergency</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -309,26 +571,42 @@ export function AddAlertModal({ onAlertAdded }: AddAlertModalProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="LOW">
+                      <SelectItem value="INFO">
                         <div className="flex items-center space-x-2">
-                          <Badge className="bg-blue-500 text-white">LOW</Badge>
-                          <span>Low Priority</span>
+                          <Badge className="bg-blue-500 text-white">INFO</Badge>
+                          <span>Info</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="MEDIUM">
+                      <SelectItem value="ADVISORY">
                         <div className="flex items-center space-x-2">
                           <Badge className="bg-yellow-500 text-white">
-                            MEDIUM
+                            ADVISORY
                           </Badge>
-                          <span>Medium Priority</span>
+                          <span>Advisory</span>
                         </div>
                       </SelectItem>
-                      <SelectItem value="HIGH">
+                      <SelectItem value="WATCH">
+                        <div className="flex items-center space-x-2">
+                          <Badge className="bg-gray-500 text-white">
+                            WATCH
+                          </Badge>
+                          <span>Watch</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="WARNING">
+                        <div className="flex items-center space-x-2">
+                          <Badge className="bg-yellow-500 text-white">
+                            WARNING
+                          </Badge>
+                          <span>Warning</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="EMERGENCY">
                         <div className="flex items-center space-x-2">
                           <Badge className="bg-orange-500 text-white">
-                            HIGH
+                            EMERGENCY
                           </Badge>
-                          <span>High Priority</span>
+                          <span>Emergency</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="CRITICAL">

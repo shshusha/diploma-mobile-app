@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  phone     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  phone          String?
+  telegramChatId Int? // Telegram chat ID for sending notifications
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   alerts            Alert[]
   locations         Location[]
@@ -81,16 +82,32 @@ model DetectionRule {
 }
 
 enum AlertType {
-  FALL_DETECTED
-  IMMOBILITY_DETECTED
-  ROUTE_DEVIATION
-  DANGER_ZONE_ENTRY
-  MANUAL_EMERGENCY
+  SEVERE_WEATHER_WARNING
+  FLOOD_WARNING
+  TORNADO_WARNING
+  HURRICANE_WARNING
+  EARTHQUAKE_ALERT
+  TSUNAMI_WARNING
+  WILDFIRE_ALERT
+  CIVIL_EMERGENCY
+  AMBER_ALERT
+  SILVER_ALERT
+  TERRORISM_ALERT
+  HAZMAT_INCIDENT
+  INFRASTRUCTURE_FAILURE
+  PUBLIC_HEALTH_EMERGENCY
+  EVACUATION_ORDER
+  SHELTER_IN_PLACE
+  ROAD_CLOSURE
+  POWER_OUTAGE
+  WATER_EMERGENCY
 }
 
 enum Severity {
-  LOW
-  MEDIUM
-  HIGH
+  INFO
+  ADVISORY
+  WATCH
+  WARNING
+  EMERGENCY
   CRITICAL
 }

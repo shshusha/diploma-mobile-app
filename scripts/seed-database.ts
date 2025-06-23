@@ -1,12 +1,12 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, AlertType, Severity } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Starting database seeding...")
+  console.log("🌱 Starting database seeding...");
 
   // Create Users
-  console.log("👥 Creating users...")
+  console.log("👥 Creating users...");
   const users = await Promise.all([
     prisma.user.upsert({
       where: { email: "john.doe@example.com" },
@@ -58,12 +58,12 @@ async function main() {
         phone: "+1-555-0105",
       },
     }),
-  ])
+  ]);
 
-  console.log(`✅ Created ${users.length} users`)
+  console.log(`✅ Created ${users.length} users`);
 
   // Create Emergency Contacts
-  console.log("📞 Creating emergency contacts...")
+  console.log("📞 Creating emergency contacts...");
   const emergencyContacts = [
     // John Doe's contacts
     {
@@ -147,25 +147,29 @@ async function main() {
       email: null,
       relation: "Emergency",
     },
-  ]
+  ];
 
   for (const contact of emergencyContacts) {
     await prisma.emergencyContact.upsert({
       where: {
-        id: `contact_${contact.userId}_${contact.name.toLowerCase().replace(/\s+/g, "_")}`,
+        id: `contact_${contact.userId}_${contact.name
+          .toLowerCase()
+          .replace(/\s+/g, "_")}`,
       },
       update: {},
       create: {
-        id: `contact_${contact.userId}_${contact.name.toLowerCase().replace(/\s+/g, "_")}`,
+        id: `contact_${contact.userId}_${contact.name
+          .toLowerCase()
+          .replace(/\s+/g, "_")}`,
         ...contact,
       },
-    })
+    });
   }
 
-  console.log(`✅ Created ${emergencyContacts.length} emergency contacts`)
+  console.log(`✅ Created ${emergencyContacts.length} emergency contacts`);
 
   // Create Detection Rules
-  console.log("⚙️ Creating detection rules...")
+  console.log("⚙️ Creating detection rules...");
   const detectionRules = [
     {
       userId: "user_john_doe",
@@ -197,7 +201,7 @@ async function main() {
       immobilityTimeout: 240, // 4 minutes
       isActive: false, // Disabled for testing
     },
-  ]
+  ];
 
   for (const rule of detectionRules) {
     await prisma.detectionRule.upsert({
@@ -209,13 +213,13 @@ async function main() {
         id: `rule_${rule.userId}`,
         ...rule,
       },
-    })
+    });
   }
 
-  console.log(`✅ Created ${detectionRules.length} detection rules`)
+  console.log(`✅ Created ${detectionRules.length} detection rules`);
 
   // Create Locations (Recent locations for each user)
-  console.log("📍 Creating location history...")
+  console.log("📍 Creating location history...");
   const locations = [
     // John Doe - Central Park area
     {
@@ -285,7 +289,7 @@ async function main() {
       heading: 225.0,
       createdAt: new Date(Date.now() - 12 * 60 * 1000), // 12 minutes ago
     },
-  ]
+  ];
 
   for (const [index, location] of locations.entries()) {
     await prisma.location.upsert({
@@ -297,133 +301,79 @@ async function main() {
         id: `location_${index + 1}`,
         ...location,
       },
-    })
+    });
   }
 
-  console.log(`✅ Created ${locations.length} location records`)
+  console.log(`✅ Created ${locations.length} location records`);
 
-  // Create Alerts (Mix of resolved and unresolved)
-  console.log("🚨 Creating alerts...")
+  // Create Alerts (Government Emergency Style)
+  console.log("🚨 Creating alerts...");
   const alerts = [
-    // Recent critical fall alert - UNRESOLVED
+    // Severe Weather Warning - CRITICAL
     {
       userId: "user_john_doe",
-      type: "FALL_DETECTED",
-      severity: "CRITICAL",
-      message: "Severe fall detected at Central Park. User may be unconscious.",
+      type: AlertType.SEVERE_WEATHER_WARNING,
+      severity: Severity.CRITICAL,
+      message:
+        "Severe thunderstorm with potential tornadoes approaching. Seek shelter immediately.",
       latitude: 40.7829,
       longitude: -73.9654,
       isResolved: false,
       resolvedAt: null,
       createdAt: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
     },
-    // High priority immobility alert - UNRESOLVED
+    // Flood Warning - EMERGENCY
     {
       userId: "user_bob_wilson",
-      type: "IMMOBILITY_DETECTED",
-      severity: "HIGH",
-      message: "No movement detected for 15 minutes. Last known location: Brooklyn Bridge.",
+      type: AlertType.FLOOD_WARNING,
+      severity: Severity.EMERGENCY,
+      message:
+        "Flash flooding expected in your area. Move to higher ground now.",
       latitude: 40.7061,
       longitude: -73.9969,
       isResolved: false,
       resolvedAt: null,
       createdAt: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
     },
-    // Route deviation - UNRESOLVED
+    // Amber Alert - WARNING
     {
       userId: "user_jane_smith",
-      type: "ROUTE_DEVIATION",
-      severity: "MEDIUM",
-      message: "User has deviated from planned route by more than 500 meters.",
+      type: AlertType.AMBER_ALERT,
+      severity: Severity.WARNING,
+      message:
+        "Amber Alert: Child abduction reported. Check local news for details.",
       latitude: 40.7578,
       longitude: -73.9857,
       isResolved: false,
       resolvedAt: null,
       createdAt: new Date(Date.now() - 8 * 60 * 1000), // 8 minutes ago
     },
-    // Manual emergency - RESOLVED
+    // Public Health Emergency - ADVISORY
     {
       userId: "user_alice_johnson",
-      type: "MANUAL_EMERGENCY",
-      severity: "HIGH",
-      message: "User manually triggered emergency alert. Reported feeling unwell.",
+      type: AlertType.PUBLIC_HEALTH_EMERGENCY,
+      severity: Severity.ADVISORY,
+      message:
+        "COVID-19 advisory: Mask mandate in effect. Follow local health guidelines.",
       latitude: 40.7074,
       longitude: -74.0113,
       isResolved: true,
       resolvedAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
       createdAt: new Date(Date.now() - 45 * 60 * 1000), // 45 minutes ago
     },
-    // Danger zone entry - RESOLVED
+    // Power Outage - INFO
     {
       userId: "user_mike_brown",
-      type: "DANGER_ZONE_ENTRY",
-      severity: "MEDIUM",
-      message: "User entered restricted construction zone area.",
+      type: AlertType.POWER_OUTAGE,
+      severity: Severity.INFO,
+      message: "Scheduled power outage in your area from 2:00 PM to 4:00 PM.",
       latitude: 40.748,
       longitude: -74.0048,
       isResolved: true,
       resolvedAt: new Date(Date.now() - 20 * 60 * 1000), // 20 minutes ago
       createdAt: new Date(Date.now() - 35 * 60 * 1000), // 35 minutes ago
     },
-    // Old fall alert - RESOLVED
-    {
-      userId: "user_john_doe",
-      type: "FALL_DETECTED",
-      severity: "MEDIUM",
-      message: "Minor fall detected. User recovered quickly.",
-      latitude: 40.7825,
-      longitude: -73.9658,
-      isResolved: true,
-      resolvedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-    },
-    // Low priority immobility - RESOLVED
-    {
-      userId: "user_jane_smith",
-      type: "IMMOBILITY_DETECTED",
-      severity: "LOW",
-      message: "Extended rest period detected. User was taking a planned break.",
-      latitude: 40.7582,
-      longitude: -73.9851,
-      isResolved: true,
-      resolvedAt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-    },
-    // Yesterday's alerts
-    {
-      userId: "user_bob_wilson",
-      type: "ROUTE_DEVIATION",
-      severity: "LOW",
-      message: "Minor route deviation to avoid construction.",
-      latitude: 40.7065,
-      longitude: -73.9965,
-      isResolved: true,
-      resolvedAt: new Date(Date.now() - 20 * 60 * 60 * 1000), // 20 hours ago
-      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 24 hours ago
-    },
-    {
-      userId: "user_alice_johnson",
-      type: "FALL_DETECTED",
-      severity: "LOW",
-      message: "Stumble detected, user maintained balance.",
-      latitude: 40.7076,
-      longitude: -74.0115,
-      isResolved: true,
-      resolvedAt: new Date(Date.now() - 22 * 60 * 60 * 1000), // 22 hours ago
-      createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000), // 25 hours ago
-    },
-    {
-      userId: "user_mike_brown",
-      type: "IMMOBILITY_DETECTED",
-      severity: "MEDIUM",
-      message: "Extended immobility during lunch break.",
-      latitude: 40.7485,
-      longitude: -74.0045,
-      isResolved: true,
-      resolvedAt: new Date(Date.now() - 26 * 60 * 60 * 1000), // 26 hours ago
-      createdAt: new Date(Date.now() - 28 * 60 * 60 * 1000), // 28 hours ago
-    },
-  ]
+  ];
 
   for (const [index, alert] of alerts.entries()) {
     await prisma.alert.upsert({
@@ -435,37 +385,37 @@ async function main() {
         id: `alert_${index + 1}`,
         ...alert,
       },
-    })
+    });
   }
 
-  console.log(`✅ Created ${alerts.length} alerts`)
+  console.log(`✅ Created ${alerts.length} alerts`);
 
   // Summary
-  console.log("\n📊 Database seeding completed!")
-  console.log("=".repeat(50))
-  console.log(`👥 Users: ${users.length}`)
-  console.log(`📞 Emergency Contacts: ${emergencyContacts.length}`)
-  console.log(`⚙️ Detection Rules: ${detectionRules.length}`)
-  console.log(`📍 Location Records: ${locations.length}`)
-  console.log(`🚨 Alerts: ${alerts.length}`)
-  console.log("=".repeat(50))
+  console.log("\n📊 Database seeding completed!");
+  console.log("=".repeat(50));
+  console.log(`👥 Users: ${users.length}`);
+  console.log(`📞 Emergency Contacts: ${emergencyContacts.length}`);
+  console.log(`⚙️ Detection Rules: ${detectionRules.length}`);
+  console.log(`📍 Location Records: ${locations.length}`);
+  console.log(`🚨 Alerts: ${alerts.length}`);
+  console.log("=".repeat(50));
 
   // Alert breakdown
-  const unresolvedAlerts = alerts.filter((a) => !a.isResolved).length
-  const criticalAlerts = alerts.filter((a) => a.severity === "CRITICAL").length
-  const highAlerts = alerts.filter((a) => a.severity === "HIGH").length
+  const unresolvedAlerts = alerts.filter((a) => !a.isResolved).length;
+  const criticalAlerts = alerts.filter((a) => a.severity === "CRITICAL").length;
+  const highAlerts = alerts.filter((a) => a.severity === "HIGH").length;
 
-  console.log(`🔴 Unresolved Alerts: ${unresolvedAlerts}`)
-  console.log(`⚠️ Critical Alerts: ${criticalAlerts}`)
-  console.log(`🟡 High Priority Alerts: ${highAlerts}`)
-  console.log("\n✅ Ready to test the dashboard!")
+  console.log(`🔴 Unresolved Alerts: ${unresolvedAlerts}`);
+  console.log(`⚠️ Critical Alerts: ${criticalAlerts}`);
+  console.log(`🟡 High Priority Alerts: ${highAlerts}`);
+  console.log("\n✅ Ready to test the dashboard!");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Error seeding database:", e)
-    process.exit(1)
+    console.error("❌ Error seeding database:", e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });
