@@ -122,7 +122,7 @@ export function LocationMap({ users, alerts }: LocationMapProps) {
 
     // Add user location markers
     users.forEach((user) => {
-      if (user.locations.length > 0) {
+      if (user.locations && user.locations.length > 0) {
         const latestLocation = user.locations[0];
         const marker = new window.google.maps.Marker({
           position: {
